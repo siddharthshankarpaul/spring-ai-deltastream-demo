@@ -1,0 +1,70 @@
+schema {
+    query: Query
+}
+
+
+type Query {
+    version: Version!
+    me: Me!
+    organization(id: UUID! , effectiveRoleName: String!): Organization!
+}
+
+type Version {
+    major: Int!
+    minor: Int!
+    patch: Int!
+}
+
+type Me {
+    givenName: String!
+}
+type Organization {
+    id: UUID!
+    name: String!
+    stores: [Store!]!
+    databases: [Database!]!
+    queries: [QueryType]!
+}
+
+type Store {
+    name: ID!
+    type: StoreType!
+    topicNames: [String!]!
+}
+
+type Database {
+    name: String!
+    schemas: [Schema!]!
+}
+
+type Schema {
+    name: String!,
+    relations: [Relation!]!
+}
+
+type Relation {
+    name: ID!
+}
+
+type Role {
+    organization: Organization!
+    name: String!
+    enabled: Boolean!
+    inherit: Boolean!
+    createdAt: Timestamp!
+    updatedAt: Timestamp!
+}
+
+type QueryType {
+    dsql: String!
+}
+
+
+enum StoreType {
+    Kafka
+    Kinesis
+    Slack
+}
+
+scalar Timestamp
+scalar UUID

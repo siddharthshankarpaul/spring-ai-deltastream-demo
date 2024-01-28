@@ -1,0 +1,6 @@
+User are categorized in different levels based on views.
+User with views above %1$d is PRO.
+User with views between %2$d and %1$d (included) is STANDARD.
+User with views between %3$d and %2$d (included) is INTERMEDIATE.
+User with views between %4$d and %3$d (included) is BEGINNER.
+User with views below %5$d is BASIC.
