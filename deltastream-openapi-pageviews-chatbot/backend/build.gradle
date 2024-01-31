@@ -1,0 +1,98 @@
+import io.github.kobylynskyi.graphql.codegen.gradle.GraphQLCodegenGradleTask
+
+plugins {
+    id 'java'
+    id 'com.diffplug.gradle.spotless' version '4.3.0'
+    id 'org.springframework.boot' version '3.2.1'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'io.github.kobylynskyi.graphql.codegen' version '5.7.2'
+    id 'com.google.cloud.tools.jib' version '3.4.0'
+}
+
+group = 'com.glitterlabs'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.apache.kafka:kafka-streams'
+    implementation 'com.theokanning.openai-gpt3-java:client:0.18.2'
+    implementation "javax.validation:validation-api:2.0.1.Final"
+
+    implementation 'io.github.kobylynskyi:graphql-java-codegen:5.9.0'
+
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0-SNAPSHOT'
+    implementation 'org.springframework.ai:spring-ai-milvus-store:0.8.0-SNAPSHOT'
+//    implementation 'io.netty:netty-codec-http2:4.1.100.Final'
+
+//    implementation "org.mapstruct:mapstruct:1.5.3.Final"
+//    annotationProcessor "org.mapstruct:mapstruct-processor:1.5.3.Final"
+
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly project(':frontend')
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task copyFrontendApp(type: Copy) {
+    dependsOn(':frontend:appNpmBuild')
+    from("${rootDir}/frontend/dist")
+    into("build/resources/main/static")
+}
+bootJar.dependsOn(copyFrontendApp)
+tasks.named('resolveMainClassName').configure { dependsOn(copyFrontendApp) }
+compileJava.dependsOn ':frontend:build'
+
+sourceSets.main.java.srcDir "$buildDir/generated"
+
+task graphqlCodegenClient(type: GraphQLCodegenGradleTask) {
+    graphqlSchemas.includePattern = 'schema\\.graphqls'
+    outputDir = new File("$buildDir/generated")
+    packageName = 'com.deltastream.graphql.model'
+    modelNameSuffix = 'TO'
+    generateApis = false
+    generateClient = true
+    generateParameterizedFieldsResolvers = false
+}
+
+compileJava.dependsOn(graphqlCodegenClient)
+
+jib {
+    container {
+        creationTime = Instant.now().toString()
+    }
+    from {
+        image = 'gcr.io/distroless/java17:nonroot'
+    }
+    to {
+        image = 'deltastream-openapi-pageviews-chatbot'
+        tags = ["latest"]
+    }
+}
+jibDockerBuild.dependsOn(bootJar)

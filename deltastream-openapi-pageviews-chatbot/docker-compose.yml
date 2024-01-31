@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  backend:
+    image: deltastream-openapi-pageviews-chatbot:latest
+    restart: on-failure
+    environment:
+      deltastreamToken: ${deltastreamToken}
+      openaiToken: ${openaiToken}
+      milvusToken: ${milvusToken}
+    ports:
+      - "8080:8080"

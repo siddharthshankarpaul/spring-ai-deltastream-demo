@@ -1,0 +1,22 @@
+plugins {
+    id 'com.github.node-gradle.node' version '2.2.4'
+}
+apply plugin: 'base'
+
+String node_version = "20.3.0"
+String dist_dir = 'dist'
+node {
+    version = node_version
+    download = true
+}
+
+task appNpmBuild(type: NpmTask) {
+    outputs.dir(new File(dist_dir))
+    args = ['run', 'build']
+}
+
+clean {
+    delete dist_dir
+}
+
+assemble.dependsOn(appNpmBuild)

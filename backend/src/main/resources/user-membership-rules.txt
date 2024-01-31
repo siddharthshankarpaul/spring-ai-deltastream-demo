@@ -1,6 +1,0 @@
-User are given different membership based on views.
-User with views above %1$d has TITANIUM membership.
-User with views between %2$d and %1$d (included) has DIAMOND membership.
-User with views between %3$d and %2$d (included) has GOLD membership.
-User with views between %4$d and %3$d (included) has SILVER membership.
-User with views below %5$d has BRONZE membership.
