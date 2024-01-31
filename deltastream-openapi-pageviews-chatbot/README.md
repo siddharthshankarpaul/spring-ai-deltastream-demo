@@ -12,7 +12,7 @@
 5. Access http://localhost:8080
 
 ### Demo
-
+[demo](demo/deltastream.mp4)
 ### Reference Documentation
 
 https://www.deltastream.io
